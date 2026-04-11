@@ -1,16 +1,17 @@
 import os
 import time
 import subprocess
+import shutil
 from subprocess import DEVNULL
 
-SAVE_DIR = "../data/images"
-os.makedirs(SAVE_DIR, exist_ok=True)
+IMAGE_DIR = "/home/pi/solar-nowcasting/data/images"
+os.makedirs(IMAGE_DIR, exist_ok=True)
 time_interval = 10
 
 def capture_photo():
-    timestamp = time.strftime("%Y%m%d-%H%M%S") # Format: YearMonthDay-HourMinuteSecond
-    filename = f"sky_{timestamp}.jpg"
-    filepath = os.path.join(SAVE_DIR, filename)
+    filename = f"sky_{time.strftime('%Y%m%d-%H%M%S')}.jpg" # Format: YearMonthDay-HourMinuteSecond
+    filepath = os.path.join(IMAGE_DIR, filename)
+    latest_image_path = os.path.join(IMAGE_DIR, "latest_capture.jpg")
 
     # rpicam-still: activate camera
     # --nopreview: no preview window
@@ -21,6 +22,7 @@ def capture_photo():
         # subprocess.run: run command in terminal
         # stderr=DEVNULL, stdout=DEVNULL: send system logging (information) to DEVNULL (trash)
         subprocess.run(cmd, shell=True, check=True, stderr=DEVNULL, stdout=DEVNULL)
+        shutil.copy(filepath, latest_image_path) # save latest image seperately (for stream)
         print(f"[{time.strftime('%H:%M:%S')}] Success: {filename} saved.")
     except Exception as e:
         print(f"[{time.strftime('%H:%M:%S')}] Capture failed: {e}")
@@ -28,7 +30,7 @@ def capture_photo():
 
 if __name__ == "__main__":
     print(f"--- Capturing Images ({time_interval}s interval)---")
-    print(f"Saving to: {os.path.abspath(SAVE_DIR)}")
+    print(f"Saving to: {os.path.abspath(IMAGE_DIR)}")
     print("Ctrl+C to stop image capture.")
 
     try:
