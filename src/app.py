@@ -3,7 +3,8 @@ import os
 
 app = Flask(__name__)
 
-IMAGE_FOLDER = "/home/pi/solar-nowcasting/data/images"
+# IMAGE_FOLDER = "/home/pi/solar-nowcasting/data/images"
+IMAGE_FOLDER = "/home/pi/solar-nowcasting/data/test"
 
 @app.route("/")
 def index():
@@ -53,7 +54,7 @@ def index():
                 document.getElementById("time").innerText = new Date().toLocaleTimeString();
             }
             // image refresh every 10 seconds
-            setInterval(updateImage, 10000);
+            setInterval(updateImage, 1000);
         </script>
     </body>
     </html>
