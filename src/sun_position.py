@@ -3,6 +3,7 @@ import cv2
 import datetime
 import numpy as np
 from pysolar.solar import get_altitude, get_azimuth
+import config
 
 
 def sun_tracker_view(image_folder, cam_azi, cam_alt, hfov=65):
@@ -14,7 +15,7 @@ def sun_tracker_view(image_folder, cam_azi, cam_alt, hfov=65):
         print("No images found.")
         return
 
-    lat, lon = 0.0, 0.0  # Coordinates of camera (must be exact position)
+    lat, lon = config.LATITUDE, config.LONGITUDE  # Coordinates of camera (must be exact position)
     i = 0
 
     while i < len(filenames):
@@ -79,7 +80,7 @@ if __name__ == "__main__":
     folder_path = "/home/pi/solar-nowcasting/data/sun detection test"  # Path of image dataset
 
     # Camera parameters must be measured exactly
-    MY_CAM_AZIMUTH = 299.0  # left right
-    MY_CAM_ALTITUDE = 9.0  # up down
+    MY_CAM_AZIMUTH = config.CAMERA_DIRECTION  # left right
+    MY_CAM_ALTITUDE = config.CAMERA_TILT  # up down
 
     sun_tracker_view(folder_path, MY_CAM_AZIMUTH, MY_CAM_ALTITUDE)
