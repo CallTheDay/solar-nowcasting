@@ -1,10 +1,14 @@
 from flask import Flask, Response, jsonify
 import os
 import json
+
 app = Flask(__name__)
+
 CAPTURE_FOLDER = "/home/pi/solar-nowcasting/data/sky captures"
 RESULT_FOLDER = "/home/pi/solar-nowcasting/data/detection results"
 STATS_FILE = "/home/pi/solar-nowcasting/data/stats.json"
+
+
 @app.route("/")
 def index():
     return """
@@ -51,8 +55,8 @@ def index():
                     <p class="value" id="wind-dir">-</p>
                 </div>
                 <div class="stat-card">
-                    <p class="label">System Status</p>
-                    <p class="value" id="status">Online</p>
+                    <p class="label">Shade ETA</p>
+                    <p class="value" id="shade-eta" style="color: #ff3333;">-</p>
                 </div>
                 <div class="stat-card">
                     <p class="label">Last Frame</p>
@@ -71,7 +75,8 @@ def index():
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById('wind-dir').innerText = data.wind_direction;
-                        document.getElementById('condition').innerText = data.sky_condition; // Fixed: Updates the field dynamically
+                        document.getElementById('condition').innerText = data.sky_condition; 
+                        document.getElementById('shade-eta').innerText = data.shade_eta;
                         document.getElementById('time').innerText = data.last_update;
                     })
                     .catch(err => console.error('Error fetching stats:', err));
@@ -83,6 +88,7 @@ def index():
     </html>
     """
 
+
 @app.route("/latest_capture.jpg")
 def latest_image():
     path = os.path.join(CAPTURE_FOLDER, "latest_capture.jpg")
@@ -90,6 +96,7 @@ def latest_image():
         with open(path, "rb") as f:
             return Response(f.read(), mimetype="image/jpeg", headers={"Cache-Control": "no-store"})
     return "No image found", 404
+
 
 @app.route("/latest_result.jpg")
 def latest_result():
@@ -99,6 +106,7 @@ def latest_result():
             return Response(f.read(), mimetype="image/jpeg", headers={"Cache-Control": "no-store"})
     return "No image found", 404
 
+
 @app.route("/api/stats")
 def get_stats():
     if os.path.exists(STATS_FILE):
@@ -107,7 +115,8 @@ def get_stats():
                 return jsonify(json.load(f))
         except Exception:
             pass
-    return jsonify({"wind_direction": "Calculating...", "sky_condition": "Analyzing...", "last_update": "--:--:--"})
+    return jsonify({"wind_direction": "Calculating...", "sky_condition": "Analyzing...", "shade_eta": "Tracking...", "last_update": "--:--:--"})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000)

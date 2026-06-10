@@ -12,3 +12,6 @@ LONGITUDE = 14.2858
 
 # Frames needed before calculating wind direction
 MIN_FRAMES_REQUIRED = 5
+
+# seconds between each image cature
+time_interval = 10

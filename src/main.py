@@ -3,6 +3,7 @@ import os
 import json
 import image_capture
 import cloud_detection
+import config
 
 CAPTURE_PATH = "/home/pi/solar-nowcasting/data/sky captures/latest_capture.jpg"
 RESULT_PATH = "/home/pi/solar-nowcasting/data/detection results/latest_result.jpg"
@@ -11,7 +12,7 @@ RESULT_PATH = "/home/pi/solar-nowcasting/data/detection results/latest_result.jp
 def main_pipeline():
     print("Starting Solar Nowcasting Main Loop...")
 
-    # Clear old historical images on startup to prevent disk space filling up
+    # Clear old image folders on startup to prevent disk space filling up
     folders_to_clean = [
         "/home/pi/solar-nowcasting/data/sky captures",
         "/home/pi/solar-nowcasting/data/detection results"
@@ -31,6 +32,7 @@ def main_pipeline():
             print(f"Cleared historical images in: {folder}")
 
     while True:
+        start_time = time.time()
         try:
             print("\n--- New Frame Cycle ---")
 
@@ -42,12 +44,13 @@ def main_pipeline():
 
                 if raw_img is not None:
                     # cloud tracking results
-                    wind_dir, sky_cond = cloud_detection.process_cloud_tracking(raw_img, RESULT_PATH)
-                    # save data points to JSON file
+                    wind_dir, sky_cond, shade_eta = cloud_detection.process_cloud_tracking(raw_img, RESULT_PATH)
+
                     stats_data = {
                         "wind_direction": wind_dir if wind_dir else "Calculating...",
                         "sky_condition": sky_cond if sky_cond else "Analyzing...",
-                        "last_update": time.strftime("%H:%M:%S")
+                        "shade_eta": shade_eta if shade_eta else "Clear",
+                        "last_update": time.strftime("%H:%M:%S")  # or your simulated_time_str for dataset tests
                     }
                     with open("/home/pi/solar-nowcasting/data/stats.json", "w") as f:
                         json.dump(stats_data, f)
@@ -57,7 +60,10 @@ def main_pipeline():
             print(f"Error in pipeline cycle: {e}")
 
         # execution frequency
-        time.sleep(10)
+        elapsed = time.time() - start_time
+        # subtract code duration from target capture time to get exact time intervals
+        sleep_time = max(0.1, config.time_interval - elapsed)
+        time.sleep(sleep_time)
 
 if __name__ == "__main__":
     main_pipeline()
