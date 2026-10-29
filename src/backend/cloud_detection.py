@@ -11,6 +11,7 @@ speed_history = {}  # individual cloud speed entries over time
 prev_centers = []
 avg_rb_mask = None
 mask_binary = None
+mask_source_path = None
 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
 
@@ -22,8 +23,8 @@ def get_cardinal_direction(degrees):
     return directions[idx]
 
 
-def process_cloud_tracking(img_raw, save_path_newest):
-    global movement_history, accumulated_movements, speed_history, prev_centers, avg_rb_mask, mask_binary, clahe
+def process_cloud_tracking(img_raw, save_path_newest, mask_path):
+    global movement_history, accumulated_movements, speed_history, prev_centers, avg_rb_mask, mask_binary, mask_source_path, clahe
 
     min_frames_required = config.MIN_FRAMES_REQUIRED  # Wait for determined amount of frame transitions before wind reading (for stability)
 
@@ -43,18 +44,20 @@ def process_cloud_tracking(img_raw, save_path_newest):
         avg_rb_mask = np.zeros((h, w), dtype=np.float32)
         print("Memory buffers allocated.")
 
-    if mask_binary is None:
-        mask_path = "/home/pi/solar-nowcasting/data/dataset3/mask.png"
-        mask_raw = cv2.imread(mask_path)
+    requested_mask_path = os.path.abspath(mask_path)
+    if mask_binary is None or requested_mask_path != mask_source_path:
+        mask_raw = cv2.imread(requested_mask_path) if os.path.isfile(requested_mask_path) else None
 
         if mask_raw is not None:
             mask_gray = cv2.cvtColor(mask_raw, cv2.COLOR_BGR2GRAY)
             mask_binary = cv2.threshold(mask_gray, 1, 255, cv2.THRESH_BINARY)[1]
             mask_binary = cv2.resize(mask_binary, image_dimensions, interpolation=cv2.INTER_NEAREST)
+            print(f"Mask loaded from {requested_mask_path}")
         else:
-            print("Using default white mask")
+            print(f"Mask not found at {requested_mask_path}; using default white mask")
             mask_binary = np.full((h, w), 255, dtype=np.uint8)
-        print("Mask loaded and resized")
+        mask_source_path = requested_mask_path
+        print("Mask setup complete")
 
     # Finetuning Parameters
     alpha = 0.8  # prevent shape jumps (1.0 = no prevention, 0.1 = high prevention) - cloud morphing

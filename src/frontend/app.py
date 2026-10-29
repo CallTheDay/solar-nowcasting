@@ -1,12 +1,17 @@
 from flask import Flask, Response, jsonify
 import os
 import json
+import sys
 
 app = Flask(__name__)
 
-CAPTURE_FOLDER = "/home/pi/solar-nowcasting/data/sky captures"
-RESULT_FOLDER = "/home/pi/solar-nowcasting/data/detection results"
-STATS_FILE = "/home/pi/solar-nowcasting/data/stats.json"
+BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend"))
+sys.path.insert(0, BACKEND_DIR)
+import runtime_paths
+
+CAPTURE_FOLDER = str(runtime_paths.CAPTURE_FOLDER)
+RESULT_FOLDER = str(runtime_paths.RESULT_FOLDER)
+STATS_FILE = str(runtime_paths.STATS_PATH)
 
 
 @app.route("/")
@@ -81,12 +86,12 @@ def index():
                     })
                     .catch(err => console.error('Error fetching stats:', err));
             }
-            setInterval(updateDashboard, 10000);
+            setInterval(updateDashboard, {{ refresh_interval }});
             window.onload = updateDashboard;
         </script>
     </body>
     </html>
-    """
+    """.replace("{{ refresh_interval }}", str(runtime_paths.DASHBOARD_REFRESH_MS))
 
 
 @app.route("/latest_capture.jpg")

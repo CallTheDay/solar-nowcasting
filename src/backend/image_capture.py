@@ -4,11 +4,12 @@ import subprocess
 import shutil
 import cv2
 from subprocess import DEVNULL
+import runtime_paths
 
-IMAGE_DIR = "/home/pi/solar-nowcasting/data/sky captures"
-os.makedirs(IMAGE_DIR, exist_ok=True)
+IMAGE_DIR = str(runtime_paths.CAPTURE_FOLDER)
 
 def capture_photo(target_latest_path=None):
+    os.makedirs(IMAGE_DIR, exist_ok=True)
     filename = f"sky_{time.strftime('%Y%m%d-%H%M%S')}.jpg"  # Format: YearMonthDay-HourMinuteSecond
     filepath = os.path.join(IMAGE_DIR, filename)
 

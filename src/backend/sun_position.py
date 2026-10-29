@@ -3,7 +3,7 @@ import cv2
 import datetime
 import numpy as np
 from pysolar.solar import get_altitude, get_azimuth
-import config
+from backend import config
 
 
 def sun_tracker_view(image_folder, cam_azi, cam_alt, hfov=65):
