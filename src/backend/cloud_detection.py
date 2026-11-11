@@ -15,6 +15,20 @@ mask_source_path = None
 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
 
+def reset_tracking_state():
+    global movement_history, accumulated_movements, speed_history, prev_centers
+    global avg_rb_mask, mask_binary, mask_source_path
+
+    # Dataset replays must not inherit cloud motion or mask data from an earlier run.
+    movement_history = []
+    accumulated_movements = {}
+    speed_history = {}
+    prev_centers = []
+    avg_rb_mask = None
+    mask_binary = None
+    mask_source_path = None
+
+
 def get_cardinal_direction(degrees):
     # Converts degrees (0-360) to string.
     degrees = degrees % 360

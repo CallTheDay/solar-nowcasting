@@ -120,6 +120,18 @@ python3 dataset_test.py
 
 This uses a previously captured dataset of sky images instead of live camera input, making testing and experimentation easier.
 
+#### Scoring shade forecasts against the light sensor
+
+To replay a captured dataset and measure how closely its shade-onset forecast matched the light sensor, run from the project root:
+
+```bash
+python evaluation/evaluate.py data/datasets/ground_truth/31_10_Abend --lux-threshold 400
+```
+
+Set `--lux-threshold` to the lux level that represents shade for the sensor and installation. An onset is the first reading at or below that threshold after a reading above it; by default it must remain below threshold for two consecutive samples (`--confirm-samples`). For each observed onset, the evaluator scores the latest numeric shade ETA issued since the previous onset. A forecast is accurate when its predicted onset is within 60 seconds of the measured onset (`--tolerance-seconds`).
+
+The JSON summary, per-onset event CSV, and replayed forecast CSV are written to `evaluation/results/`. The timing accuracy percentage counts missed shade events as inaccurate; mean absolute timing error is calculated for events that had a forecast. A dataset with no threshold crossing is reported as not scorable. This first metric focuses on timing observed shade-onset events; forecasts that predict shade when no onset occurs are not yet scored as false alarms.
+
 ---
 
 ## Dashboard Outputs
