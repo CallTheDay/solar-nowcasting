@@ -12,7 +12,7 @@ BACKEND_DIR = PROJECT_ROOT / "src" / "backend"
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-import cloud_detection
+import cloud_detection_original
 
 
 IMAGE_EXTENSIONS = {".bmp", ".jpeg", ".jpg", ".png", ".tif", ".tiff"}
@@ -172,8 +172,8 @@ def evaluate(input_dir):
                 if image is None:
                     raise ValueError(f"Could not read image: {image_path}")
 
-                cloud_detection.reset_tracking_state()
-                _, _, _, detected_mask = cloud_detection.process_cloud_tracking(
+                cloud_detection_original.reset_tracking_state()
+                _, _, _, detected_mask = cloud_detection_original.process_cloud_tracking(
                     image,
                     str(result_path),
                     str(mask_path),

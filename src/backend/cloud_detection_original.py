@@ -14,7 +14,8 @@ mask_binary = None
 mask_source_path = None
 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
-
+# Original cloud detection and tracking algorithm, based on the NRBR (Normalized Red-Blue Ratio) and a manually set threshold.
+# This is the original algorithm used in the project, and is kept for reference and comparison with newer methods.
 def reset_tracking_state():
     global movement_history, accumulated_movements, speed_history, prev_centers
     global avg_rb_mask, mask_binary, mask_source_path

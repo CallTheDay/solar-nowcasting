@@ -4,7 +4,7 @@ import shutil
 import sys
 import time
 import cv2
-import cloud_detection
+import cloud_detection_original
 import config
 import runtime_paths
 
