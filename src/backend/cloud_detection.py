@@ -15,6 +15,20 @@ mask_source_path = None
 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
 
+def reset_tracking_state():
+    global movement_history, accumulated_movements, speed_history, prev_centers
+    global avg_rb_mask, mask_binary, mask_source_path
+
+    # Dataset replays must not inherit cloud motion or mask data from an earlier run.
+    movement_history = []
+    accumulated_movements = {}
+    speed_history = {}
+    prev_centers = []
+    avg_rb_mask = None
+    mask_binary = None
+    mask_source_path = None
+
+
 def get_cardinal_direction(degrees):
     # Converts degrees (0-360) to string.
     degrees = degrees % 360
@@ -23,7 +37,7 @@ def get_cardinal_direction(degrees):
     return directions[idx]
 
 
-def process_cloud_tracking(img_raw, save_path_newest, mask_path):
+def process_cloud_tracking(img_raw, save_path_newest, mask_path, return_cloud_mask=False):
     global movement_history, accumulated_movements, speed_history, prev_centers, avg_rb_mask, mask_binary, mask_source_path, clahe
 
     min_frames_required = config.MIN_FRAMES_REQUIRED  # Wait for determined amount of frame transitions before wind reading (for stability)
@@ -120,6 +134,10 @@ def process_cloud_tracking(img_raw, save_path_newest, mask_path):
     rb_output = img_raw.copy()
     contours, _ = cv2.findContours(rb_stable, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     valid_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > 400]  # sort out small contours
+    cloud_mask = None
+    if return_cloud_mask:
+        cloud_mask = np.zeros_like(rb_stable)
+        cv2.drawContours(cloud_mask, valid_contours, -1, 255, cv2.FILLED)
 
     cv2.drawContours(rb_output, valid_contours, -1, (0, 0, 0), 1)  # visualizing contours
     print("contours drawn")
@@ -272,4 +290,7 @@ def process_cloud_tracking(img_raw, save_path_newest, mask_path):
     else:
         global_shade_eta = "No Threat"
 
-    return global_cardinal_result, sky_condition, global_shade_eta
+    result = (global_cardinal_result, sky_condition, global_shade_eta)
+    if return_cloud_mask:
+        return result + (cloud_mask,)
+    return result

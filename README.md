@@ -120,6 +120,28 @@ python3 dataset_test.py
 
 This uses a previously captured dataset of sky images instead of live camera input, making testing and experimentation easier.
 
+#### Evaluating detected cloud shapes
+
+From the project root, run:
+
+```bash
+python src/eval/detection_evaluation.py
+```
+
+The evaluator processes each non-`_bin` image in `data/datasets/evaluation/binary`, uses its matching `_mask` image as the detector's sky mask, and compares the detected cloud mask with the matching `_bin` ground-truth image. Masks can be named either `<image>_mask` or `<image>_bin_mask`. When ground-truth clouds are present, the detected-cloud percentage is the fraction of white ground-truth cloud pixels detected inside the mask's white (valid) area; the missed percentage is the remainder. False positives (detected cloud pixels outside ground-truth clouds) are also reported as a count and percentage of valid area, including cloudless images. Black mask pixels are excluded from all metrics. If the mask contains no valid pixels, the evaluator displays the image with scores marked N/A rather than stopping. The view shows the detected cloud outline over the original image, the detected mask, and `_bin` ground truth side by side. Use the left/right arrow keys to navigate and `Q`/`Esc` to quit. Use `--input-dir` to evaluate another folder with the same image-pair naming convention.
+
+#### Scoring shade forecasts against the light sensor
+
+To replay a captured dataset and measure how closely its shade-onset forecast matched the light sensor, run from the project root:
+
+```bash
+python evaluation/evaluate.py data/datasets/ground_truth/31_10_Abend --lux-threshold 400
+```
+
+Set `--lux-threshold` to the lux level that represents shade for the sensor and installation. An onset is the first reading at or below that threshold after a reading above it; by default it must remain below threshold for two consecutive samples (`--confirm-samples`). For each observed onset, the evaluator scores the latest numeric shade ETA issued since the previous onset. A forecast is accurate when its predicted onset is within 60 seconds of the measured onset (`--tolerance-seconds`).
+
+The JSON summary, per-onset event CSV, and replayed forecast CSV are written to `evaluation/results/`. The timing accuracy percentage counts missed shade events as inaccurate; mean absolute timing error is calculated for events that had a forecast. A dataset with no threshold crossing is reported as not scorable. This first metric focuses on timing observed shade-onset events; forecasts that predict shade when no onset occurs are not yet scored as false alarms.
+
 ---
 
 ## Dashboard Outputs
