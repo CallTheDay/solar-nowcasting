@@ -4,7 +4,6 @@ import shutil
 import sys
 import time
 import cv2
-import image_capture
 import cloud_detection
 import config
 import runtime_paths
@@ -111,6 +110,8 @@ def wait_for_dataset_key():
 def run_live_pipeline():
     if not runtime_paths.IS_RASPBERRY_PI:
         raise RuntimeError("Live camera capture is only available when running on the Raspberry Pi.")
+
+    import image_capture
 
     print("Starting live image capture...")
     clean_live_output_folders()
